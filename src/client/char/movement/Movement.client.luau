@@ -4,8 +4,8 @@ local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 
-local NORMAL_SPEED = 32
-local SPRINT_SPEED = 64
+local NORMAL_SPEED = 24
+local SPRINT_SPEED = NORMAL_SPEED*2
 
 local function updateSpeed()
 	humanoid.WalkSpeed = player:GetAttribute("IsSprinting")
