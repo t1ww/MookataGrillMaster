@@ -11,9 +11,10 @@ local part = workspace
 	:WaitForChild("Sample instances")
 	:WaitForChild("thai boat grill pan")
 
-part.Anchored = true
+part.Anchored = false
 part.CanCollide = false
 
 RunService.Heartbeat:Connect(function()
-	part.CFrame = part.CFrame:Lerp(hrp.CFrame, 0.25)
+	-- lerp POSITION ONLY
+	part.Position = part.Position:Lerp(hrp.Position, 0.25)
 end)
