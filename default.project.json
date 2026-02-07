@@ -5,7 +5,7 @@
 
     "ReplicatedStorage": {
       "FromRojo": {
-        "$path": "src/shared"
+        "$path": "src/store"
       }
     },
 

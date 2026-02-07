@@ -1,8 +1,7 @@
 -- StarterPlayer/StarterCharacterScripts/Movement (LocalScript)
-
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
-local character = script.Parent
+local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 
 local NORMAL_SPEED = 32
@@ -17,4 +16,3 @@ end
 updateSpeed()
 
 player:GetAttributeChangedSignal("IsSprinting"):Connect(updateSpeed)
-
