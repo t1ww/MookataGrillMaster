@@ -34,7 +34,10 @@ print(E.FromValue[2]) --> "Running"
 banner("PlayerDataService basic mutation")
 
 local PlayerDataService = require(
-	ServerScriptService:WaitForChild("Server"):WaitForChild("PlayerDataService"):WaitForChild("PlayerDataService")
+	ServerScriptService:WaitForChild("Server")
+		:WaitForChild("Data")
+		:WaitForChild("Player")
+		:WaitForChild("PlayerDataService")
 )
 
 -- get existing player (Studio already spawned one)
