@@ -1,5 +1,5 @@
 --!strict
--- src/server/PlayerDataService/PlayerDataTypes.luau
+-- src\server\Data\DataTypes.luau
 
 export type CurrencySave = {
 	Money: number,

@@ -1,4 +1,4 @@
--- src\server\PlayerDataService\PlayerDataStore.luau
+-- src\server\Data\Player\PlayerDataStore.luau
 local DSS = game:GetService("DataStoreService")
 local Store = DSS:GetDataStore("PlayerSave_V1")
 

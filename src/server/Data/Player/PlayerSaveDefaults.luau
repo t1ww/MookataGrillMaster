@@ -1,4 +1,4 @@
--- src\server\PlayerDataService\PlayerSaveDefaults.luau
+-- src\server\Data\Player\PlayerSaveDefaults.luau
 local Defaults = {}
 local VERSION = 1
 

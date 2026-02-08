@@ -1,4 +1,4 @@
--- src\server\PlayerDataService\PlayerSession.luau
+-- src\server\Data\Player\PlayerSession.luau
 local Session = {}
 local sessions = {}
 

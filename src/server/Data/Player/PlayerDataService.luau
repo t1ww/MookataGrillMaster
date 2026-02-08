@@ -1,4 +1,4 @@
--- src\server\PlayerDataService\PlayerDataService.luau
+-- src\server\Data\Player\PlayerDataService.luau
 local Players = game:GetService("Players")
 
 local Session   = require(script.Parent.PlayerSession)
