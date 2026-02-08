@@ -1,1 +1,2 @@
-print("Hello from Character!")
+-- src\client\char\init\init.client.luau
+-- print("Hello from Character!")
