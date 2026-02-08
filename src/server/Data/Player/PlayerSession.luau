@@ -1,21 +1,24 @@
+--!strict
 -- src\server\Data\Player\PlayerSession.luau
+local Types = require(script.Parent.Parent.DataTypes)
+
 local Session = {}
-local sessions = {}
+local sessions: {[number]: Types.PlayerSave} = {}
 
-function Session.Attach(userId, data)
-    sessions[userId] = data
+function Session.Attach(userId: number, data: Types.PlayerSave)
+	sessions[userId] = data
 end
 
-function Session.Get(userId)
-    return sessions[userId]
+function Session.Get(userId: number): Types.PlayerSave?
+	return sessions[userId]
 end
 
-function Session.Detach(userId)
-    sessions[userId] = nil
+function Session.Detach(userId: number)
+	sessions[userId] = nil
 end
 
-function Session.All()
-    return sessions
+function Session.All(): {[number]: Types.PlayerSave}
+	return sessions
 end
 
 return Session

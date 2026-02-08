@@ -101,3 +101,5 @@ export type PlayerSave = {
 
 	Analytics: AnalyticsSave,
 }
+
+return {}
