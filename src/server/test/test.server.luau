@@ -48,12 +48,17 @@ while not player do
 end
 
 -- wait until PlayerDataService finished attaching session data
-while not PlayerDataService.Get(player) do
+local save
+while true do
+	save = PlayerDataService.Get(player)
+	if save then
+		break
+	end
 	task.wait()
 end
 
--- read
-local save = PlayerDataService.Get(player)
+-- from here on, `save` is guaranteed non-nil
+
 print("Initial money:", save.Currency.Money)
 
 -- modify
@@ -61,9 +66,12 @@ PlayerDataService.Modify(player, function(data)
 	data.Currency.Money += 100
 end)
 
-print("After grant:", PlayerDataService.Get(player).Currency.Money)
+local updatedSave = PlayerDataService.Get(player)
+assert(updatedSave, "Save should exist after Modify")
 
--- force save (safe even in Studio; no-op if datastore disabled)
+print("After grant:", updatedSave.Currency.Money)
+
+-- force save
 PlayerDataService.RequestImmediateSave(player)
 
 banner("PlayerDataService test complete")
