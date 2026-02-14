@@ -2,11 +2,11 @@
 --!strict
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local BuildingGrid = require(script.Parent.BuildingGrid)
+local Grid = require(ReplicatedStorage.FromRojo.Shared.Game.BuildingSystem.BuildingGrid)
 local TEMPLATES = ReplicatedStorage:WaitForChild("Cloud"):WaitForChild("BuildingTemplates")
 
 -- Using size info from Furniture data:
-local _storageData = game:GetService("ReplicatedStorage"):WaitForChild("FromRojo"):WaitForChild("Data")
+local _storageData = ReplicatedStorage:WaitForChild("FromRojo"):WaitForChild("Data")
 local FurnitureData = require(_storageData:WaitForChild("Items"):WaitForChild("Furniture"))
 
 local BuildingPlacement = {}
@@ -18,15 +18,9 @@ function BuildingPlacement.Place(player, key: string, worldPos: Vector3): (boole
 	end
 
 	local size = itemData.Size
-	local cell = BuildingGrid.worldToCell(worldPos)
+	local cell = Grid.worldToCell(worldPos)
 
-	if not BuildingGrid.canOccupy(cell, size) then
-		return false, "Space is occupied"
-	end
-
-	BuildingGrid.occupy(cell, size)
-
-	-- clone & position using the key → template in ReplicatedStorage
+	-- clone & position
 	local template = TEMPLATES:WaitForChild(key)
 	local model = template:Clone()
 
@@ -36,13 +30,10 @@ function BuildingPlacement.Place(player, key: string, worldPos: Vector3): (boole
 		end
 	end
 
-	-- center‐of‐area cell → world pos
 	local centerCell = cell + Vector2.new((size.X - 1) / 2, (size.Y - 1) / 2)
-	local pos = BuildingGrid.cellToWorld(centerCell)
+	local pos = Grid.cellToWorld(centerCell)
 	if model.PrimaryPart then
-		-- offset Y so the bottom of the model sits on the grid
-		local yOffset = model.PrimaryPart.Size.Y / 2
-		model:SetPrimaryPartCFrame(CFrame.new(pos + Vector3.new(0, yOffset, 0)))
+		model:SetPrimaryPartCFrame(CFrame.new(pos + Vector3.new(0, model.PrimaryPart.Size.Y / 2, 0)))
 	else
 		for _, part in ipairs(model:GetDescendants()) do
 			if part:IsA("BasePart") then
@@ -52,7 +43,7 @@ function BuildingPlacement.Place(player, key: string, worldPos: Vector3): (boole
 	end
 
 	model.Parent = workspace.Buildings
-	return true
+	return true, nil
 end
 
 return BuildingPlacement

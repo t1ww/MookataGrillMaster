@@ -1,5 +1,6 @@
 -- src\client\player\Game\BuildingSystem\GridRenderer.luau
-local Grid = require(script.Parent.BuildingGrid)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Grid = require(ReplicatedStorage.FromRojo.Shared.Game.BuildingSystem.BuildingGrid)
 
 local Renderer = {}
 Renderer.parts = {}

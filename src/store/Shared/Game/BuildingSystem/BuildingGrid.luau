@@ -1,4 +1,4 @@
--- src/store/Shared/Game/BuildingSystem/BuildingGrid.luau
+-- src\store\Shared\Game\BuildingSystem\BuildingGrid.luau
 --!strict
 local RunService = game:GetService("RunService")
 

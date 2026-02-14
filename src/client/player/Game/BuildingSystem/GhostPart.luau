@@ -1,6 +1,7 @@
 -- src\client\player\Game\BuildingSystem\GhostPart.luau
 --!strict
-local Grid = require(script.Parent:WaitForChild("BuildingGrid"))
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Grid = require(ReplicatedStorage.FromRojo.Shared.Game.BuildingSystem.BuildingGrid)
 
 local Ghost = {}
 Ghost.parts = {}
