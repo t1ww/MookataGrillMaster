@@ -44,13 +44,16 @@ local function spawnPart(cframe: CFrame, size: Vector3, color: Color3, transpare
 end
 
 -- spawn a ghost tile (highlight)
-function Ghost.spawnTile(cell: Vector2, occupied: boolean)
+function Ghost.spawnTile(cell: Vector2)
 	if not Grid.isInside(cell) then
 		return
 	end
 	local worldPos = Grid.cellToWorld(cell)
+	-- check occupancy
+	local occupied = not Grid.canOccupy(cell, Vector2.new(1, 1))
 	local color = occupied and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 255, 0)
-	local part = spawnPart(CFrame.new(worldPos), Vector3.new(Grid.tileSize, 0.5, Grid.tileSize), color, 0.5)
+	local opacity = 0.5
+	local part = spawnPart(CFrame.new(worldPos), Vector3.new(Grid.tileSize, 0.5, Grid.tileSize), color, opacity)
 	table.insert(Ghost.tiles, part)
 end
 

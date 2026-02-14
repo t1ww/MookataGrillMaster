@@ -18,7 +18,7 @@ local pointEv = ReplicatedStorage.BuildingRemotes.PointingCellUpdate
 local currentKey: string? = "BasicPan"
 
 -- toggleable build mode -- default
-local buildModeEnabled = false 
+local buildModeEnabled = false
 local gridSpawned = false
 
 -- spawn all grid lines once
@@ -59,24 +59,38 @@ UserInputService.InputBegan:Connect(function(input, gpe)
 	end
 end)
 
+-- track last highlighted cell to avoid flicker
+local lastCell: Vector2? = nil
+
 RunService.RenderStepped:Connect(function()
 	-- only clear ghost tiles, grid lines remain
-	Ghost.clearTiles()
 	if not buildModeEnabled or not currentKey or not mouse.Hit then
+		lastCell = nil
+		Ghost.clearTiles()
 		return
 	end
 
 	local size = FurnitureData[currentKey].Size
 	local cell = Grid.getPointingCell(mouse.Hit.Position, size)
+
+	-- only update if cell changed
+	if lastCell and lastCell == cell then
+		return
+	end
+
+	lastCell = cell
+
+	-- recycle previous tiles
+	Ghost.clearTiles()
+
 	pointEv:FireServer(cell)
 
 	for dx = 0, size.X - 1 do
 		for dy = 0, size.Y - 1 do
-			Ghost.spawnTile(cell + Vector2.new(dx, dy), false)
+			Ghost.spawnTile(cell + Vector2.new(dx, dy))
 		end
 	end
 end)
-
 -- placement
 UserInputService.InputBegan:Connect(function(input, gpe)
 	if gpe then
