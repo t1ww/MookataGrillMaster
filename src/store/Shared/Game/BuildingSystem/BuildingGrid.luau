@@ -5,7 +5,7 @@ local RunService = game:GetService("RunService")
 local Grid = {}
 
 Grid.tileSize = 4
-Grid.areaSize = 13
+Grid.areaSize = 50
 Grid.plotOrigin = Vector3.new(0, 0, 0)
 
 -- Bounds helpers
