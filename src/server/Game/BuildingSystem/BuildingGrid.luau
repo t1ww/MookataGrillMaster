@@ -4,7 +4,7 @@
 local Grid = {}
 
 Grid.tileSize = 4
-Grid.areaSize = 25
+Grid.areaSize = 13
 Grid.plotOrigin = Vector3.new(0, 0, 0)
 
 local occupancy: { [string]: boolean } = {}

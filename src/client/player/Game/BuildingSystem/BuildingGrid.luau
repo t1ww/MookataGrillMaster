@@ -4,7 +4,7 @@
 local Grid = {}
 
 Grid.tileSize = 4 -- studs per grid cell
-Grid.areaSize = 25 -- 13x13 build area
+Grid.areaSize = 13 -- 13x13 build area
 Grid.plotOrigin = Vector3.new(0, 0, 0)
 
 -- occupancy map: { ["x,y"] = true }
