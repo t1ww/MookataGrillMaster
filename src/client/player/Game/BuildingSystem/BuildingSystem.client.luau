@@ -91,6 +91,7 @@ RunService.RenderStepped:Connect(function()
 		end
 	end
 end)
+
 -- placement
 UserInputService.InputBegan:Connect(function(input, gpe)
 	if gpe then
@@ -102,4 +103,16 @@ UserInputService.InputBegan:Connect(function(input, gpe)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 and currentKey then
 		placeEv:FireServer(currentKey, mouse.Hit.Position)
 	end
+end)
+
+-- ensure the UpdateGhostColor RemoteEvent exists on client
+local ghostEv = ReplicatedStorage:WaitForChild("BuildingRemotes"):WaitForChild("UpdateGhostColor")
+
+-- store latest occupancy info per cell
+local ghostColors: { [string]: boolean } = {}
+
+-- listen for server updates
+ghostEv.OnClientEvent:Connect(function(cell: Vector2, occupied: boolean)
+	local key = ("%d,%d"):format(cell.X, cell.Y)
+	ghostColors[key] = occupied
 end)

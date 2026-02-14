@@ -32,10 +32,24 @@ if not pointEv then
 	pointEv.Parent = remotes
 end
 
--- track player pointing index
+-- track player pointing index and notify occupancy
 pointEv.OnServerEvent:Connect(function(player, cell: Vector2)
 	player:SetAttribute("PointingCellX", cell.X)
 	player:SetAttribute("PointingCellY", cell.Y)
+
+	-- check occupancy for the cell (1x1 assumed)
+	local occupied = not Grid.canOccupy(cell, Vector2.new(1, 1))
+
+	-- ensure UpdateGhostColor RemoteEvent exists
+	local ghostEv = remotes:FindFirstChild("UpdateGhostColor")
+	if not ghostEv then
+		ghostEv = Instance.new("RemoteEvent")
+		ghostEv.Name = "UpdateGhostColor"
+		ghostEv.Parent = remotes
+	end
+
+	-- send occupancy info to this client
+	ghostEv:FireClient(player, cell, occupied)
 end)
 
 placeEv.OnServerEvent:Connect(function(player, key: string, _worldPos: Vector3)
