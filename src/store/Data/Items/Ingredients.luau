@@ -1,4 +1,4 @@
--- src\server\Data\Ingredients\Ingredients.luau
+-- src\store\Data\Items\Ingredients.luau
 local Ingredients = {
 	Tomato = { Price = 5 },
 	Meat = { Price = 10 },

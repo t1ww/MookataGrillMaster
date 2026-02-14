@@ -1,4 +1,4 @@
--- src\server\Data\Equipment\Equipment.luau
+-- src\store\Data\Items\Equipment.luau
 local Equipment = {
 	Pan = { Price = 100 },
 	Stove = { Price = 200 },

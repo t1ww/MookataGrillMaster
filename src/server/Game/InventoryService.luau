@@ -1,13 +1,15 @@
 --!strict
 -- src\server\Data\Player\InventoryService.luau
-
 local _Players = game:GetService("Players")
-local Session = require(script.Parent.Parent.Player.PlayerSession)
-local Scheduler = require(script.Parent.Parent.Player.SaveScheduler)
+local _playerDataService = game.ServerScriptService.Server.Data.Player
+local Session = require(_playerDataService.PlayerSession)
+local Scheduler = require(_playerDataService.SaveScheduler)
 
-local Ingredients = require(script.Parent.Ingredients)
-local Equipment = require(script.Parent.Equipment)
-local Furniture = require(script.Parent.Furniture)
+local _storageData = game:GetService("ReplicatedStorage"):WaitForChild("FromRojo"):WaitForChild("Data")
+local _dataItems = _storageData:WaitForChild("Items")
+local Ingredients = require(_dataItems:WaitForChild("Ingredients"))
+local Equipment = require(_dataItems:WaitForChild("Equipment"))
+local Furniture = require(_dataItems:WaitForChild("Furniture"))
 
 local InventoryService = {}
 
