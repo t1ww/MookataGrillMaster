@@ -10,7 +10,7 @@ function Defaults.New(): Types.PlayerSave
 		Version = VERSION,
 
 		Currency = {
-			Money = 0,
+			Money = 5000,
 		},
 
 		Progression = {
@@ -19,17 +19,8 @@ function Defaults.New(): Types.PlayerSave
 			UnlockedRecipes = {},
 		},
 
-		Inventory = {
-			Ingredients = {},
-			Equipment = {
-				Pans = {},
-				Stoves = {},
-			},
-			Furniture = {
-				Tables = {},
-				Decorations = {},
-			},
-		},
+		-- flatten Inventory into one table:
+		Inventory = {}, -- { [itemKey:string]: number | boolean }
 
 		Pigs = {},
 		DiscoveredNPCs = {},
