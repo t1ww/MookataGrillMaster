@@ -40,11 +40,13 @@ function BuildingPlacement.Place(player, key: string, worldPos: Vector3): (boole
 	local centerCell = cell + Vector2.new((size.X - 1) / 2, (size.Y - 1) / 2)
 	local pos = BuildingGrid.cellToWorld(centerCell)
 	if model.PrimaryPart then
-		model:SetPrimaryPartCFrame(CFrame.new(pos))
+		-- offset Y so the bottom of the model sits on the grid
+		local yOffset = model.PrimaryPart.Size.Y / 2
+		model:SetPrimaryPartCFrame(CFrame.new(pos + Vector3.new(0, yOffset, 0)))
 	else
 		for _, part in ipairs(model:GetDescendants()) do
 			if part:IsA("BasePart") then
-				part.CFrame = CFrame.new(pos)
+				part.CFrame = CFrame.new(pos + Vector3.new(0, part.Size.Y / 2, 0))
 			end
 		end
 	end

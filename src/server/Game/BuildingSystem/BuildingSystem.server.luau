@@ -27,6 +27,8 @@ if not placeEv then
 end
 
 placeEv.OnServerEvent:Connect(function(player, key: string, worldPos: Vector3)
+	print("SERVER RECEIVED:", player.Name, key, worldPos)
+
 	local ok, err = BuildingPlacement.Place(player, key, worldPos)
 	if not ok then
 		warn("BuildingPlacement failed for", player.Name, key, err)
