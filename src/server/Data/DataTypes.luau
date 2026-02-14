@@ -8,7 +8,7 @@ export type CurrencySave = {
 export type ProgressionSave = {
 	PigFarmingUnlocked: boolean,
 	AnalyticsUnlocked: boolean,
-	UnlockedRecipes: {[string]: boolean},
+	UnlockedRecipes: { [string]: boolean },
 }
 
 export type PanInstance = {
@@ -24,8 +24,8 @@ export type StoveInstance = {
 }
 
 export type EquipmentInventory = {
-	Pans: {[string]: PanInstance},
-	Stoves: {[string]: StoveInstance},
+	Pans: { [string]: PanInstance },
+	Stoves: { [string]: StoveInstance },
 }
 
 export type FurnitureInstance = {
@@ -34,12 +34,12 @@ export type FurnitureInstance = {
 }
 
 export type FurnitureInventory = {
-	Tables: {[string]: FurnitureInstance},
-	Decorations: {[string]: FurnitureInstance},
+	Tables: { [string]: FurnitureInstance },
+	Decorations: { [string]: FurnitureInstance },
 }
 
 export type InventorySave = {
-	Ingredients: {[string]: number},
+	Ingredients: { [string]: number },
 	Equipment: EquipmentInventory,
 	Furniture: FurnitureInventory,
 }
@@ -55,7 +55,7 @@ export type PigSave = {
 		Meatyness: number,
 	},
 
-	AppliedFeeds: {string},
+	AppliedFeeds: { string },
 }
 
 export type NPCSave = {
@@ -89,17 +89,23 @@ export type AnalyticsSave = {
 	},
 }
 
+-- src\server\Data\DataTypes.luau
 export type PlayerSave = {
 	Version: number,
-
-	Currency: CurrencySave,
-	Progression: ProgressionSave,
-	Inventory: InventorySave,
-
-	Pigs: {[string]: PigSave},
-	DiscoveredNPCs: {[string]: NPCSave},
-
-	Analytics: AnalyticsSave,
+	Currency: { Money: number },
+	Progression: {
+		PigFarmingUnlocked: boolean,
+		AnalyticsUnlocked: boolean,
+		UnlockedRecipes: { [string]: boolean },
+	},
+	-- now a flat table keyed by itemKey:
+	Inventory: { [string]: number | boolean },
+	Pigs: { [number]: any },
+	DiscoveredNPCs: { [number]: any },
+	Analytics: {
+		DiscoveredFlavorSamples: number,
+		KnownFlavorRanges: { [string]: any },
+	},
 }
 
 return {}
