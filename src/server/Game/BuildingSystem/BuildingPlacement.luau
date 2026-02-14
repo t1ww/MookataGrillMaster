@@ -11,6 +11,11 @@ local FurnitureData = require(_storageData:WaitForChild("Items"):WaitForChild("F
 
 local BuildingPlacement = {}
 
+-- Create Buildings folder
+local BuildingsFolder = Instance.new("Folder")
+BuildingsFolder.Name = "Buildings"
+BuildingsFolder.Parent = workspace
+
 function BuildingPlacement.Place(player, key: string, worldPos: Vector3): (boolean, string?)
 	local itemData = FurnitureData[key]
 	if not itemData then
@@ -42,7 +47,7 @@ function BuildingPlacement.Place(player, key: string, worldPos: Vector3): (boole
 		end
 	end
 
-	model.Parent = workspace.Buildings
+	model.Parent = BuildingsFolder
 	return true, nil
 end
 
