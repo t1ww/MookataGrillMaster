@@ -1,4 +1,4 @@
--- src/server/Game/BuildingSystem/BuildingGrid.luau
+-- src\client\player\Game\BuildingSystem\BuildingGrid.luau
 --!strict
 
 local Grid = {}
@@ -83,6 +83,21 @@ function Grid.clear(cell: Vector2, size: Vector2)
 			occupancy[key] = nil
 		end
 	end
+end
+
+-- Centralize pointing grid index to prevent mismatch placement and ghost
+function Grid.getPointingCell(worldPos: Vector3, size: Vector2): Vector2
+	-- convert to base cell (top-left corner of the building)
+	local relative = worldPos - Grid.plotOrigin
+	local x = math.floor(relative.X / Grid.tileSize + 0.5)
+	local y = math.floor(relative.Z / Grid.tileSize + 0.5)
+	local cell = Vector2.new(x, y)
+
+	-- clamp so building does not overflow plot
+	local half = math.floor(Grid.areaSize / 2)
+	cell = Vector2.new(math.clamp(cell.X, -half, half - size.X + 1), math.clamp(cell.Y, -half, half - size.Y + 1))
+
+	return cell
 end
 
 return Grid
