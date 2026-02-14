@@ -18,6 +18,7 @@ local currentKey: string? = "BasicPan"
 
 RunService.RenderStepped:Connect(function()
 	Ghost.clear()
+
 	if not currentKey or not mouse.Hit then
 		return
 	end
@@ -25,20 +26,21 @@ RunService.RenderStepped:Connect(function()
 	local baseCell = Grid.worldToCell(mouse.Hit.Position)
 	local size = FurnitureData[currentKey].Size
 
-	-- limit tiles in allowed area
+	-- Draw ghost tiles
 	for dx = 0, size.X - 1 do
 		for dy = 0, size.Y - 1 do
 			local cell = baseCell + Vector2.new(dx, dy)
-			Ghost.spawnTile(cell, false) -- occupancy check can be added later
+			Ghost.spawnTile(cell, false)
 		end
 	end
 
-	-- grid lines
-	local centerCell = Grid.worldToCell(Grid.CENTER_POS)
-	for dx = -Grid.GRID_RADIUS, Grid.GRID_RADIUS do
-		for dy = -Grid.GRID_RADIUS, Grid.GRID_RADIUS do
-			local cell = centerCell + Vector2.new(dx, dy)
-			Ghost.spawnGridLine(cell, centerCell)
+	-- Draw grid lines based on areaSize
+	local half = math.floor(Grid.areaSize / 2)
+
+	for dx = -half, half do
+		for dy = -half, half do
+			local cell = Vector2.new(dx, dy)
+			Ghost.spawnGridLine(cell, Vector2.zero)
 		end
 	end
 end)
@@ -47,6 +49,7 @@ UserInputService.InputBegan:Connect(function(input, gpe)
 	if gpe then
 		return
 	end
+
 	if input.UserInputType == Enum.UserInputType.MouseButton1 and currentKey then
 		placeEv:FireServer(currentKey, mouse.Hit.Position)
 	end

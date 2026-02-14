@@ -1,33 +1,88 @@
--- src\client\player\Game\BuildingSystem\BuildingGrid.luau
+-- src/server/Game/BuildingSystem/BuildingGrid.luau
 --!strict
+
 local Grid = {}
 
-Grid.TILE_SIZE = 4
-Grid.GRID_RADIUS = 6 -- 13x13 area
-Grid.FLOOR_Y = 0
-Grid.LINE_THICKNESS = 0.1
+Grid.tileSize = 4 -- studs per grid cell
+Grid.areaSize = 25 -- 13x13 build area
+Grid.plotOrigin = Vector3.new(0, 0, 0)
 
--- center of the allowed building area (spawn)
-Grid.CENTER_POS = Vector3.new(0, 0, 0)
+-- occupancy map: { ["x,y"] = true }
+local occupancy: { [string]: boolean } = {}
 
--- convert world position → grid cell
+-- Plot configuration
+function Grid.setPlotOrigin(origin: Vector3)
+	Grid.plotOrigin = origin
+end
+
+-- Bounds helpers
+-- Half size computed from areaSize
+local function getHalfSize(): number
+	return math.floor(Grid.areaSize / 2)
+end
+
+function Grid.isInside(cell: Vector2): boolean
+	local half = getHalfSize()
+	return math.abs(cell.X) <= half and math.abs(cell.Y) <= half
+end
+
+-- Conversions
+-- world Position → grid cell (Vector2)
 function Grid.worldToCell(pos: Vector3): Vector2
-	local half = Grid.TILE_SIZE / 2
-	local x = math.floor((pos.X + half) / Grid.TILE_SIZE)
-	local y = math.floor((pos.Z + half) / Grid.TILE_SIZE)
+	local relative = pos - Grid.plotOrigin
+	local halfTile = Grid.tileSize / 2
+
+	local x = math.floor((relative.X + halfTile) / Grid.tileSize)
+	local y = math.floor((relative.Z + halfTile) / Grid.tileSize)
+
 	return Vector2.new(x, y)
 end
 
--- convert cell → world position (center)
+-- grid cell → world Position (center of cell)
 function Grid.cellToWorld(cell: Vector2): Vector3
-	return Vector3.new(cell.X * Grid.TILE_SIZE, Grid.FLOOR_Y, cell.Y * Grid.TILE_SIZE)
+	local x = cell.X * Grid.tileSize
+	local z = cell.Y * Grid.tileSize
+
+	return Grid.plotOrigin + Vector3.new(x, 0, z)
 end
 
--- check if cell is within allowed 25x25 area
-function Grid.isInsideAllowedArea(cell: Vector2): boolean
-	local centerCell = Grid.worldToCell(Grid.CENTER_POS)
-	return math.abs(cell.X - centerCell.X) <= Grid.GRID_RADIUS
-	   and math.abs(cell.Y - centerCell.Y) <= Grid.GRID_RADIUS
+-- Occupancy
+function Grid.canOccupy(cell: Vector2, size: Vector2): boolean
+	for dx = 0, size.X - 1 do
+		for dy = 0, size.Y - 1 do
+			local checkCell = Vector2.new(cell.X + dx, cell.Y + dy)
+
+			-- 🔥 Bounds check added
+			if not Grid.isInside(checkCell) then
+				return false
+			end
+
+			local key = ("%d,%d"):format(checkCell.X, checkCell.Y)
+			if occupancy[key] then
+				return false
+			end
+		end
+	end
+
+	return true
+end
+
+function Grid.occupy(cell: Vector2, size: Vector2)
+	for dx = 0, size.X - 1 do
+		for dy = 0, size.Y - 1 do
+			local key = ("%d,%d"):format(cell.X + dx, cell.Y + dy)
+			occupancy[key] = true
+		end
+	end
+end
+
+function Grid.clear(cell: Vector2, size: Vector2)
+	for dx = 0, size.X - 1 do
+		for dy = 0, size.Y - 1 do
+			local key = ("%d,%d"):format(cell.X + dx, cell.Y + dy)
+			occupancy[key] = nil
+		end
+	end
 end
 
 return Grid
