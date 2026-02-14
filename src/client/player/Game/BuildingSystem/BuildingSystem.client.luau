@@ -1,4 +1,4 @@
--- src\client\player\Game/BuildingSystem/BuildingSystem.client.lua
+-- src/client/player/Game/BuildingSystem/BuildingSystem.client.lua
 --!strict
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
