@@ -1,4 +1,4 @@
--- src/client/player/Game/BuildingSystem/BuildingSystem.client.lua
+-- src\client\player\Game/BuildingSystem/BuildingSystem.client.lua
 --!strict
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -24,9 +24,23 @@ local pointEv = ReplicatedStorage:WaitForChild("BuildingRemotes"):WaitForChild("
 local currentKey: string? = nil
 currentKey = "BasicPan" -- test
 
+-- toggleable build mode
+local buildModeEnabled = true
+
+-- toggle key
+UserInputService.InputBegan:Connect(function(input, gpe)
+	if gpe then
+		return
+	end
+	if input.KeyCode == Enum.KeyCode.One then
+		buildModeEnabled = not buildModeEnabled
+		Ghost.clear()
+	end
+end)
+
 RunService.RenderStepped:Connect(function()
 	Ghost.clear()
-	if not currentKey or not mouse.Hit then
+	if not buildModeEnabled or not currentKey or not mouse.Hit then
 		return
 	end
 
@@ -34,12 +48,14 @@ RunService.RenderStepped:Connect(function()
 	local cell = Grid.getPointingCell(mouse.Hit.Position, size)
 	pointEv:FireServer(cell) -- sync pointing index to server
 
+	-- spawn ghost tiles
 	for dx = 0, size.X - 1 do
 		for dy = 0, size.Y - 1 do
 			Ghost.spawnTile(cell + Vector2.new(dx, dy), false)
 		end
 	end
 
+	-- spawn grid lines
 	local half = math.floor(Grid.areaSize / 2)
 	for dx = -half, half do
 		for dy = -half, half do
@@ -50,6 +66,9 @@ end)
 
 UserInputService.InputBegan:Connect(function(input, gpe)
 	if gpe then
+		return
+	end
+	if not buildModeEnabled then
 		return
 	end
 	if input.UserInputType == Enum.UserInputType.MouseButton1 and currentKey then
