@@ -104,6 +104,7 @@ UserInputService.InputBegan:Connect(function(input, gpe)
 		placeEv:FireServer(currentKey, mouse.Hit.Position)
 		-- force next RenderStepped to recompute
 		lastCell = nil
+		-- TODO: Re-render with a frame delay to immediately give feedback on placement
 	end
 end)
 
@@ -114,4 +115,5 @@ local ghostEv = ReplicatedStorage:WaitForChild("BuildingRemotes"):WaitForChild("
 ghostEv.OnClientEvent:Connect(function(cell: Vector2, occupied: boolean)
 	local key = ("%d,%d"):format(cell.X, cell.Y)
 	Ghost.ghostColors[key] = occupied -- <- update Ghost.ghostColors directly from server
+	-- TODO: Re-render with a frame delay to immediately give feedback on placement
 end)
