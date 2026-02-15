@@ -21,6 +21,9 @@ local currentKey: string? = "BasicPan"
 local buildModeEnabled = false
 local gridSpawned = false
 
+-- track last highlighted cell to avoid flicker
+local lastCell: Vector2? = nil
+
 -- spawn all grid lines once
 local function spawnGrid()
 	if gridSpawned then
@@ -44,6 +47,22 @@ local function clearGrid()
 	Ghost.clearGrid() -- this now clear only grid lines on toggle off
 end
 
+-- centralized ghost renderer (single source of truth)
+local function renderGhost(cell: Vector2)
+	if not currentKey then
+		return
+	end
+
+	local size = FurnitureData[currentKey].Size
+
+	Ghost.clearTiles()
+	for dx = 0, size.X - 1 do
+		for dy = 0, size.Y - 1 do
+			Ghost.spawnTile(cell + Vector2.new(dx, dy))
+		end
+	end
+end
+
 -- toggle key
 UserInputService.InputBegan:Connect(function(input, gpe)
 	if gpe then
@@ -54,13 +73,12 @@ UserInputService.InputBegan:Connect(function(input, gpe)
 		if buildModeEnabled then
 			spawnGrid()
 		else
+			lastCell = nil
+			Ghost.clearTiles()
 			clearGrid()
 		end
 	end
 end)
-
--- track last highlighted cell to avoid flicker
-local lastCell: Vector2? = nil
 
 RunService.RenderStepped:Connect(function()
 	-- only clear ghost tiles, grid lines remain
@@ -80,16 +98,9 @@ RunService.RenderStepped:Connect(function()
 
 	lastCell = cell
 
-	-- recycle previous tiles
-	Ghost.clearTiles()
+	pointEv:FireServer(cell) -- only here
 
-	pointEv:FireServer(cell)
-
-	for dx = 0, size.X - 1 do
-		for dy = 0, size.Y - 1 do
-			Ghost.spawnTile(cell + Vector2.new(dx, dy))
-		end
-	end
+	renderGhost(cell)
 end)
 
 -- placement
@@ -104,7 +115,6 @@ UserInputService.InputBegan:Connect(function(input, gpe)
 		placeEv:FireServer(currentKey, mouse.Hit.Position)
 		-- force next RenderStepped to recompute
 		lastCell = nil
-		-- TODO: Re-render with a frame delay to immediately give feedback on placement
 	end
 end)
 
@@ -114,6 +124,19 @@ local ghostEv = ReplicatedStorage:WaitForChild("BuildingRemotes"):WaitForChild("
 -- listen for server updates
 ghostEv.OnClientEvent:Connect(function(cell: Vector2, occupied: boolean)
 	local key = ("%d,%d"):format(cell.X, cell.Y)
-	Ghost.ghostColors[key] = occupied -- <- update Ghost.ghostColors directly from server
-	-- TODO: Re-render with a frame delay to immediately give feedback on placement
+
+	local previous = Ghost.ghostColors[key]
+	if previous == nil then
+		previous = false
+	end
+
+	if previous == occupied then
+		return -- no visual change
+	end
+
+	Ghost.ghostColors[key] = occupied
+
+	if lastCell and lastCell == cell then
+		renderGhost(cell)
+	end
 end)
