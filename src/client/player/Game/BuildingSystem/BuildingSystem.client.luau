@@ -113,9 +113,5 @@ local ghostEv = ReplicatedStorage:WaitForChild("BuildingRemotes"):WaitForChild("
 -- listen for server updates
 ghostEv.OnClientEvent:Connect(function(cell: Vector2, occupied: boolean)
 	local key = ("%d,%d"):format(cell.X, cell.Y)
-	Ghost.ghostColors[key] = occupied
-
-	-- immediately redraw this tile
-	Ghost.clearTiles()
-	Ghost.spawnTile(cell)
+	Ghost.ghostColors[key] = occupied -- <- update Ghost.ghostColors directly from server
 end)
