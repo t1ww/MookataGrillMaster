@@ -5,8 +5,9 @@ local Grid = require(ReplicatedStorage.FromRojo.Shared.Game.BuildingSystem.Build
 
 local Ghost = {}
 Ghost.tiles = {} -- active ghost tiles (per-frame)
-Ghost.gridLines = {} -- persistent grid lines
-Ghost.partPool = {} -- recycled parts
+Ghost.gridLines = {} -- persistent grid lines (guide)
+Ghost.partPool = {}
+Ghost.ghostColors = {}
 
 local LINE_THICKNESS = 0.15
 
@@ -49,10 +50,13 @@ function Ghost.spawnTile(cell: Vector2)
 		return
 	end
 	local worldPos = Grid.cellToWorld(cell)
-	-- check occupancy
-	local occupied = not Grid.canOccupy(cell, Vector2.new(1, 1))
+
+	-- determine color from latest server update
+	local key = ("%d,%d"):format(cell.X, cell.Y)
+	local occupied = Ghost.ghostColors[key] or false -- <- use Ghost.ghostColors
 	local color = occupied and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 255, 0)
 	local opacity = 0.5
+
 	local part = spawnPart(CFrame.new(worldPos), Vector3.new(Grid.tileSize, 0.5, Grid.tileSize), color, opacity)
 	table.insert(Ghost.tiles, part)
 end
