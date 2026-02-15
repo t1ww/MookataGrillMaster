@@ -102,6 +102,8 @@ UserInputService.InputBegan:Connect(function(input, gpe)
 	end
 	if input.UserInputType == Enum.UserInputType.MouseButton1 and currentKey then
 		placeEv:FireServer(currentKey, mouse.Hit.Position)
+		-- force next RenderStepped to recompute
+		lastCell = nil
 	end
 end)
 
