@@ -1,10 +1,10 @@
 -- src\store\Data\Items\Furniture.luau
 -- Keeping these in ReplicatedStorage / Cloud / BuildingTemplates
--- - Example: ReplicatedStorage/Cloud/BuildingTemplates/BasicPan for the BasicPan in the data.
+-- - Example: ReplicatedStorage/Cloud/BuildingTemplates/BasicBoatGrillPan for the BasicBoatGrillPan in the data.
 -- By the table, placing chairs <= prefer amount will +satisfy, max will -satisfy
 local Furniture = {
 	-- Pans
-	BasicPan = { Price = 75, Size = Vector2.new(1, 1) },
+	BasicBoatGrillPan = { Price = 75, Size = Vector2.new(1, 1) },
 
 	-- Tables
 	WoodenTable1x1 = { Price = 50, Size = Vector2.new(1, 1) }, -- Prefer 2 chair, max 4 chair

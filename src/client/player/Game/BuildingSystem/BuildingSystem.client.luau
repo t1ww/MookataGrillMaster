@@ -15,7 +15,7 @@ local placeEv = ReplicatedStorage.BuildingRemotes.PlaceBuilding
 local pointEv = ReplicatedStorage.BuildingRemotes.PointingCellUpdate
 
 -- currently selected building
-local currentKey: string? = "BasicPan"
+local currentKey: string? = "BasicBoatGrillPan"
 
 -- toggleable build mode -- default
 local buildModeEnabled = false
