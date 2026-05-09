@@ -23,11 +23,6 @@ configEv.OnClientEvent:Connect(function(config)
 	Grid.setPlotOrigin(config.origin)
 end)
 
--- listen for occupancy updates
-ghostEv.OnClientEvent:Connect(function(cell, occupied)
-	currentOccupied = occupied
-end)
-
 -- currently selected building
 local currentKey: string? = "WoodenTable1x1"
 
@@ -37,7 +32,7 @@ local gridSpawned = false
 
 -- track last highlighted cell to avoid flicker
 local lastCell: Vector2? = nil
-local currentOccupied = false
+local lastPointRequestId = 0
 
 -- spawn all grid lines once
 local function spawnGrid()
@@ -68,8 +63,23 @@ local function renderGhost(cell: Vector2)
 		return
 	end
 
+	local size = FurnitureData[currentKey].Size
+	local occupied = false
+	for dx = 0, size.X - 1 do
+		for dy = 0, size.Y - 1 do
+			local key = ("%d,%d"):format(cell.X + dx, cell.Y + dy)
+			if Ghost.ghostColors[key] then
+				occupied = true
+				break
+			end
+		end
+		if occupied then
+			break
+		end
+	end
+
 	Ghost.clearGhostModel()
-	Ghost.spawnGhostModel(currentKey, cell, currentOccupied)
+	Ghost.spawnGhostModel(currentKey, cell, occupied)
 end
 
 -- toggle key
@@ -106,8 +116,8 @@ RunService.RenderStepped:Connect(function()
 	end
 
 	lastCell = cell
-
-	pointEv:FireServer(cell, size) -- only here
+	lastPointRequestId += 1
+	pointEv:FireServer(cell, size, lastPointRequestId) -- only here
 
 	renderGhost(cell)
 end)
@@ -121,28 +131,19 @@ UserInputService.InputBegan:Connect(function(input, gpe)
 		return
 	end
 	if input.UserInputType == Enum.UserInputType.MouseButton1 and currentKey then
-		placeEv:FireServer(currentKey, mouse.Hit.Position)
+		placeEv:FireServer(currentKey, lastCell)
 		-- force next RenderStepped to recompute
 		lastCell = nil
 	end
 end)
 
--- ensure the UpdateGhostColor RemoteEvent exists on client
-local ghostEv = ReplicatedStorage:WaitForChild("BuildingRemotes"):WaitForChild("UpdateGhostColor")
-
 -- listen for server updates
-ghostEv.OnClientEvent:Connect(function(cell: Vector2, occupied: boolean)
+ghostEv.OnClientEvent:Connect(function(cell: Vector2, occupied: boolean, requestId: number?)
+	if not requestId or requestId ~= lastPointRequestId then
+		return
+	end
+
 	local key = ("%d,%d"):format(cell.X, cell.Y)
-
-	local previous = Ghost.ghostColors[key]
-	if previous == nil then
-		previous = false
-	end
-
-	if previous == occupied then
-		return -- no visual change
-	end
-
 	Ghost.ghostColors[key] = occupied
 
 	if lastCell and lastCell == cell then

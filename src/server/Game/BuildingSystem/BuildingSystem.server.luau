@@ -40,27 +40,31 @@ if not ghostEv then
 end
 
 -- track player pointing index and notify occupancy
-pointEv.OnServerEvent:Connect(function(player, cell: Vector2, size: Vector2)
+pointEv.OnServerEvent:Connect(function(player, cell: Vector2, size: Vector2, requestId: number?)
 	player:SetAttribute("PointingCellX", cell.X)
 	player:SetAttribute("PointingCellY", cell.Y)
 
 	-- check occupancy for the cell with given size
 	local occupied = not Grid.canOccupy(cell, size)
+	print("Pointing at cell", cell, "size", size, "occupied", occupied)
 
 	-- send occupancy info to this client
-	ghostEv:FireClient(player, cell, occupied)
+	ghostEv:FireClient(player, cell, occupied, requestId or 0)
 end)
 
-placeEv.OnServerEvent:Connect(function(player, key: string, _worldPos: Vector3)
+placeEv.OnServerEvent:Connect(function(player, key: string, cell: Vector2)
 	local size = require(ReplicatedStorage.Data.Items.Furniture)[key].Size
-	local cell = Vector2.new(player:GetAttribute("PointingCellX"), player:GetAttribute("PointingCellY"))
+	print("Placing", key, "at cell", cell, "size", size)
+	local canOccupy = Grid.canOccupy(cell, size)
+	print("canOccupy result:", canOccupy)
 
-	if not Grid.canOccupy(cell, size) then
+	if not canOccupy then
 		warn(player.Name, "cannot place", key, "space occupied")
 		return
 	end
 
 	Grid.occupy(cell, size)
+	print("Placed", key, "at cell", cell, "size", size)
 	BuildingPlacement.Place(player, key, Grid.cellToWorld(cell))
 end)
 
