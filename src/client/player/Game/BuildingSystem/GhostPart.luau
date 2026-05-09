@@ -8,6 +8,7 @@ Ghost.tiles = {} -- active ghost tiles (per-frame)
 Ghost.gridLines = {} -- persistent grid lines (guide)
 Ghost.partPool = {}
 Ghost.ghostColors = {}
+Ghost.ghostModel = nil -- current ghost model
 
 local LINE_THICKNESS = 0.15
 
@@ -101,6 +102,47 @@ function Ghost.spawnGridLine(cell: Vector2, centerCell: Vector2)
 	end
 end
 
+-- spawn ghost model
+function Ghost.spawnGhostModel(key: string, cell: Vector2, occupied: boolean)
+	if Ghost.ghostModel then
+		Ghost.ghostModel:Destroy()
+	end
+
+	local TEMPLATES = ReplicatedStorage:WaitForChild("Cloud"):WaitForChild("BuildingTemplates")
+	local template = TEMPLATES:FindFirstChild(key)
+	if not template then
+		return
+	end
+	local model = template:Clone()
+
+	local color = occupied and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 255, 0)
+
+	-- make it ghost
+	for _, part in ipairs(model:GetDescendants()) do
+		if part:IsA("BasePart") then
+			part.Anchored = true
+			part.CanCollide = false
+			part.Transparency = 0.5
+			part.Color = color
+		end
+	end
+
+	-- position
+	local FurnitureData = require(ReplicatedStorage.FromRojo.Data.Items.Furniture)
+	local size = FurnitureData[key].Size
+	local centerCell = cell + Vector2.new((size.X - 1) / 2, (size.Y - 1) / 2)
+	local pos = Grid.cellToWorld(centerCell)
+
+	if model.PrimaryPart then
+		model:SetPrimaryPartCFrame(CFrame.new(pos + Vector3.new(0, model.PrimaryPart.Size.Y / 2, 0)))
+	else
+		model:PivotTo(CFrame.new(pos))
+	end
+
+	model.Parent = folder
+	Ghost.ghostModel = model
+end
+
 -- clear ghost tiles only (per-frame)
 function Ghost.clearTiles()
 	for _, p in ipairs(Ghost.tiles) do
@@ -117,6 +159,14 @@ function Ghost.clearGrid()
 		table.insert(Ghost.partPool, p)
 	end
 	Ghost.gridLines = {}
+end
+
+-- clear ghost model
+function Ghost.clearGhostModel()
+	if Ghost.ghostModel then
+		Ghost.ghostModel:Destroy()
+		Ghost.ghostModel = nil
+	end
 end
 
 return Ghost

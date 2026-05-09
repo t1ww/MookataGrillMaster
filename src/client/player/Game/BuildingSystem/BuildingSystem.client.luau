@@ -11,8 +11,22 @@ local mouse = localPlayer:GetMouse()
 local Grid = require(ReplicatedStorage.Shared.Game.BuildingSystem.BuildingGrid)
 local Ghost = require(script.Parent:WaitForChild("GhostPart"))
 local FurnitureData = require(ReplicatedStorage.Data.Items.Furniture)
-local placeEv = ReplicatedStorage.BuildingRemotes.PlaceBuilding
-local pointEv = ReplicatedStorage.BuildingRemotes.PointingCellUpdate
+
+local remotes = ReplicatedStorage:WaitForChild("BuildingRemotes")
+local placeEv = remotes:WaitForChild("PlaceBuilding")
+local pointEv = remotes:WaitForChild("PointingCellUpdate")
+local ghostEv = remotes:WaitForChild("UpdateGhostColor")
+local configEv = remotes:WaitForChild("InitGrid")
+
+-- listen for grid config
+configEv.OnClientEvent:Connect(function(config)
+	Grid.setPlotOrigin(config.origin)
+end)
+
+-- listen for occupancy updates
+ghostEv.OnClientEvent:Connect(function(cell, occupied)
+	currentOccupied = occupied
+end)
 
 -- currently selected building
 local currentKey: string? = "WoodenTable1x1"
@@ -23,6 +37,7 @@ local gridSpawned = false
 
 -- track last highlighted cell to avoid flicker
 local lastCell: Vector2? = nil
+local currentOccupied = false
 
 -- spawn all grid lines once
 local function spawnGrid()
@@ -53,14 +68,8 @@ local function renderGhost(cell: Vector2)
 		return
 	end
 
-	local size = FurnitureData[currentKey].Size
-
-	Ghost.clearTiles()
-	for dx = 0, size.X - 1 do
-		for dy = 0, size.Y - 1 do
-			Ghost.spawnTile(cell + Vector2.new(dx, dy))
-		end
-	end
+	Ghost.clearGhostModel()
+	Ghost.spawnGhostModel(currentKey, cell, currentOccupied)
 end
 
 -- toggle key
@@ -74,7 +83,7 @@ UserInputService.InputBegan:Connect(function(input, gpe)
 			spawnGrid()
 		else
 			lastCell = nil
-			Ghost.clearTiles()
+			Ghost.clearGhostModel()
 			clearGrid()
 		end
 	end
@@ -84,7 +93,7 @@ RunService.RenderStepped:Connect(function()
 	-- only clear ghost tiles, grid lines remain
 	if not buildModeEnabled or not currentKey or not mouse.Hit then
 		lastCell = nil
-		Ghost.clearTiles()
+		Ghost.clearGhostModel()
 		return
 	end
 
@@ -98,7 +107,7 @@ RunService.RenderStepped:Connect(function()
 
 	lastCell = cell
 
-	pointEv:FireServer(cell) -- only here
+	pointEv:FireServer(cell, size) -- only here
 
 	renderGhost(cell)
 end)
