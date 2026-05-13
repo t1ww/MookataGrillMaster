@@ -19,7 +19,7 @@ local LINE_THICKNESS = 0.15
 
 -- folder to keep ghost parts organized
 local folder = workspace:FindFirstChild("GhostParts")
-if not folder then
+if (not folder) then
 	folder = Instance.new("Folder")
 	folder.Name = "GhostParts"
 	folder.Parent = workspace
@@ -28,7 +28,7 @@ end
 -- get a part from pool or create new
 local function getPart(): Part
 	local p = table.remove(Ghost.partPool)
-	if p then
+	if (p) then
 		p.Parent = folder
 		return p
 	end
@@ -52,7 +52,7 @@ end
 
 -- spawn a ghost tile (highlight)
 function Ghost.spawnTile(cell: Vector2)
-	if not Grid.isInside(cell) then
+	if (not Grid.isInside(cell)) then
 		return
 	end
 	local worldPos = Grid.cellToWorld(cell)
@@ -69,7 +69,7 @@ end
 
 -- spawn grid line (persistent)
 function Ghost.spawnGridLine(cell: Vector2, centerCell: Vector2)
-	if not Grid.isInside(cell) then
+	if (not Grid.isInside(cell)) then
 		return
 	end
 	local worldPos = Grid.cellToWorld(cell)
@@ -109,13 +109,13 @@ end
 
 -- spawn ghost model
 function Ghost.spawnGhostModel(key: string, cell: Vector2, occupied: boolean)
-	if Ghost.ghostModel then
+	if (Ghost.ghostModel) then
 		Ghost.ghostModel:Destroy()
 	end
 
 	local TEMPLATES = ReplicatedStorage:WaitForChild("Cloud"):WaitForChild("BuildingTemplates")
 	local template = TEMPLATES:FindFirstChild(key)
-	if not template then
+	if (not template) then
 		return
 	end
 	local model = template:Clone()
@@ -124,7 +124,7 @@ function Ghost.spawnGhostModel(key: string, cell: Vector2, occupied: boolean)
 
 	-- make it ghost
 	for _, part in ipairs(model:GetDescendants()) do
-		if part:IsA("BasePart") then
+		if (part:IsA("BasePart")) then
 			part.Anchored = true
 			part.CanCollide = false
 			part.Transparency = 0.5
@@ -138,7 +138,7 @@ function Ghost.spawnGhostModel(key: string, cell: Vector2, occupied: boolean)
 	local centerCell = cell + Vector2.new((size.X - 1) / 2, (size.Y - 1) / 2)
 	local pos = Grid.cellToWorld(centerCell)
 
-	if model.PrimaryPart then
+	if (model.PrimaryPart) then
 		model:SetPrimaryPartCFrame(CFrame.new(pos + Vector3.new(0, model.PrimaryPart.Size.Y / 2, 0)))
 	else
 		model:PivotTo(CFrame.new(pos))
@@ -168,7 +168,7 @@ end
 
 -- clear ghost model
 function Ghost.clearGhostModel()
-	if Ghost.ghostModel then
+	if (Ghost.ghostModel) then
 		Ghost.ghostModel:Destroy()
 		Ghost.ghostModel = nil
 	end
