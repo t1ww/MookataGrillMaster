@@ -1,2 +1,2 @@
 -- src\client\player\init\init.client.luau
--- print("Hello from Player!")
+print("Player client have been initialized successfully!")

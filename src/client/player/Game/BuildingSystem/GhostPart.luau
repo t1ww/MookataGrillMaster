@@ -4,11 +4,16 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Grid = require(ReplicatedStorage.FromRojo.Shared.Game.BuildingSystem.BuildingGrid)
 
 local Ghost = {}
-Ghost.tiles = {} -- active ghost tiles (per-frame)
-Ghost.gridLines = {} -- persistent grid lines (guide)
+-- active ghost tiles (per-frame)
+Ghost.tiles = {}
+-- persistent grid lines (guide)
+Ghost.gridLines = {}
+-- part pool for recycling
 Ghost.partPool = {}
+-- colors for ghost tiles
 Ghost.ghostColors = {}
-Ghost.ghostModel = nil -- current ghost model
+-- current ghost model
+Ghost.ghostModel = nil
 
 local LINE_THICKNESS = 0.15
 

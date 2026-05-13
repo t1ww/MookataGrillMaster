@@ -1,5 +1,5 @@
---!strict
 -- src\server\Data\Player\InventoryService.luau
+--!strict
 local _Players = game:GetService("Players")
 local _playerDataService = game.ServerScriptService.Server.Data.Player
 local Session = require(_playerDataService.PlayerSession)

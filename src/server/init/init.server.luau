@@ -1,2 +1,2 @@
 -- src\server\init\init.server.luau
--- print("Hello world, from server!")
+print("Server have been initialized successfully!")
