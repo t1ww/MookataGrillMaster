@@ -36,7 +36,7 @@ local lastPointRequestId = 0
 
 -- spawn all grid lines once
 local function spawnGrid()
-	if gridSpawned then
+	if (gridSpawned) then
 		return
 	end
 	gridSpawned = true
@@ -50,7 +50,7 @@ end
 
 -- clear all grid lines
 local function clearGrid()
-	if not gridSpawned then
+	if (not gridSpawned) then
 		return
 	end
 	gridSpawned = false
@@ -59,7 +59,7 @@ end
 
 -- centralized ghost renderer (single source of truth)
 local function renderGhost(cell: Vector2)
-	if not currentKey then
+	if (not currentKey) then
 		return
 	end
 
@@ -68,12 +68,12 @@ local function renderGhost(cell: Vector2)
 	for dx = 0, size.X - 1 do
 		for dy = 0, size.Y - 1 do
 			local key = ("%d,%d"):format(cell.X + dx, cell.Y + dy)
-			if Ghost.ghostColors[key] then
+			if (Ghost.ghostColors[key]) then
 				occupied = true
 				break
 			end
 		end
-		if occupied then
+		if (occupied) then
 			break
 		end
 	end
@@ -84,12 +84,12 @@ end
 
 -- toggle key
 UserInputService.InputBegan:Connect(function(input, gpe)
-	if gpe then
+	if (gpe) then
 		return
 	end
-	if input.KeyCode == Enum.KeyCode.One then
+	if (input.KeyCode == Enum.KeyCode.One) then
 		buildModeEnabled = not buildModeEnabled
-		if buildModeEnabled then
+		if (buildModeEnabled) then
 			spawnGrid()
 		else
 			lastCell = nil
@@ -101,7 +101,7 @@ end)
 
 RunService.RenderStepped:Connect(function()
 	-- only clear ghost tiles, grid lines remain
-	if not buildModeEnabled or not currentKey or not mouse.Hit then
+	if ((not buildModeEnabled) or (not currentKey) or (not mouse.Hit)) then
 		lastCell = nil
 		Ghost.clearGhostModel()
 		return
@@ -111,7 +111,7 @@ RunService.RenderStepped:Connect(function()
 	local cell = Grid.getPointingCell(mouse.Hit.Position, size)
 
 	-- only update if cell changed
-	if lastCell and lastCell == cell then
+	if (lastCell and lastCell == cell) then
 		return
 	end
 
@@ -124,13 +124,13 @@ end)
 
 -- placement
 UserInputService.InputBegan:Connect(function(input, gpe)
-	if gpe then
+	if (gpe) then
 		return
 	end
-	if not buildModeEnabled then
+	if (not buildModeEnabled) then
 		return
 	end
-	if input.UserInputType == Enum.UserInputType.MouseButton1 and currentKey then
+	if (input.UserInputType == Enum.UserInputType.MouseButton1 and currentKey) then
 		placeEv:FireServer(currentKey, lastCell)
 		-- force next RenderStepped to recompute
 		lastCell = nil
@@ -139,14 +139,14 @@ end)
 
 -- listen for server updates
 ghostEv.OnClientEvent:Connect(function(cell: Vector2, occupied: boolean, requestId: number?)
-	if not requestId or requestId ~= lastPointRequestId then
+	if (not requestId or requestId ~= lastPointRequestId) then
 		return
 	end
 
 	local key = ("%d,%d"):format(cell.X, cell.Y)
 	Ghost.ghostColors[key] = occupied
 
-	if lastCell and lastCell == cell then
+	if (lastCell and lastCell == cell) then
 		renderGhost(cell)
 	end
 end)
