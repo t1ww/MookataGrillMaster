@@ -9,7 +9,7 @@ local localPlayer = Players.LocalPlayer
 local mouse = localPlayer:GetMouse()
 
 local Grid = require(ReplicatedStorage.Shared.Game.BuildingSystem.BuildingGrid)
-local Ghost = require(script.Parent:WaitForChild("GhostPart"))
+local BuildingPreview = require(script.Parent:WaitForChild("BuildingPreview"))
 local FurnitureData = require(ReplicatedStorage.Data.Items.Furniture)
 
 local remotes = ReplicatedStorage:WaitForChild("BuildingRemotes")
@@ -43,7 +43,7 @@ local function spawnGrid()
 	local half = math.floor(Grid.areaSize / 2)
 	for dx = -half, half do
 		for dy = -half, half do
-			Ghost.spawnGridLine(Vector2.new(dx, dy), Vector2.zero)
+			BuildingPreview.spawnGridLine(Vector2.new(dx, dy), Vector2.zero)
 		end
 	end
 end
@@ -54,7 +54,7 @@ local function clearGrid()
 		return
 	end
 	gridSpawned = false
-	Ghost.clearGrid() -- this now clear only grid lines on toggle off
+	BuildingPreview.clearGrid() -- this now clear only grid lines on toggle off
 end
 
 -- centralized ghost renderer (single source of truth)
@@ -68,7 +68,7 @@ local function renderGhost(cell: Vector2)
 	for dx = 0, size.X - 1 do
 		for dy = 0, size.Y - 1 do
 			local key = ("%d,%d"):format(cell.X + dx, cell.Y + dy)
-			if (Ghost.ghostColors[key]) then
+			if (BuildingPreview.ghostColors[key]) then
 				occupied = true
 				break
 			end
@@ -78,8 +78,8 @@ local function renderGhost(cell: Vector2)
 		end
 	end
 
-	Ghost.clearGhostModel()
-	Ghost.spawnGhostModel(currentKey, cell, occupied)
+	BuildingPreview.clearGhostModel()
+	BuildingPreview.spawnGhostModel(currentKey, cell, occupied)
 end
 
 -- toggle key
@@ -93,7 +93,7 @@ UserInputService.InputBegan:Connect(function(input, gpe)
 			spawnGrid()
 		else
 			lastCell = nil
-			Ghost.clearGhostModel()
+			BuildingPreview.clearGhostModel()
 			clearGrid()
 		end
 	end
@@ -103,7 +103,7 @@ RunService.RenderStepped:Connect(function()
 	-- only clear ghost tiles, grid lines remain
 	if ((not buildModeEnabled) or (not currentKey) or (not mouse.Hit)) then
 		lastCell = nil
-		Ghost.clearGhostModel()
+		BuildingPreview.clearGhostModel()
 		return
 	end
 
@@ -144,7 +144,7 @@ ghostEv.OnClientEvent:Connect(function(cell: Vector2, occupied: boolean, request
 	end
 
 	local key = ("%d,%d"):format(cell.X, cell.Y)
-	Ghost.ghostColors[key] = occupied
+	BuildingPreview.ghostColors[key] = occupied
 
 	if (lastCell and lastCell == cell) then
 		renderGhost(cell)

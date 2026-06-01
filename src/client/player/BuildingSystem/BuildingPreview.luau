@@ -1,33 +1,33 @@
--- src\client\player/Game/BuildingSystem/GhostPart.luau
+-- src\client\player/Game/BuildingSystem/BuildingPreview.luau
 --!strict
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Grid = require(ReplicatedStorage.FromRojo.Shared.Game.BuildingSystem.BuildingGrid)
 
-local Ghost = {}
+local BuildingPreview = {}
 -- active ghost tiles (per-frame)
-Ghost.tiles = {}
+BuildingPreview.tiles = {}
 -- persistent grid lines (guide)
-Ghost.gridLines = {}
+BuildingPreview.gridLines = {}
 -- part pool for recycling
-Ghost.partPool = {}
+BuildingPreview.partPool = {}
 -- colors for ghost tiles
-Ghost.ghostColors = {}
+BuildingPreview.ghostColors = {}
 -- current ghost model
-Ghost.ghostModel = nil
+BuildingPreview.ghostModel = nil
 
 local LINE_THICKNESS = 0.15
 
 -- folder to keep ghost parts organized
-local folder = workspace:FindFirstChild("GhostParts")
+local folder = workspace:FindFirstChild("BuildingGhosts")
 if (not folder) then
 	folder = Instance.new("Folder")
-	folder.Name = "GhostParts"
+	folder.Name = "BuildingGhosts"
 	folder.Parent = workspace
 end
 
 -- get a part from pool or create new
 local function getPart(): Part
-	local p = table.remove(Ghost.partPool)
+	local p = table.remove(BuildingPreview.partPool)
 	if (p) then
 		p.Parent = folder
 		return p
@@ -51,7 +51,7 @@ local function spawnPart(cframe: CFrame, size: Vector3, color: Color3, transpare
 end
 
 -- spawn a ghost tile (highlight)
-function Ghost.spawnTile(cell: Vector2)
+function BuildingPreview.spawnTile(cell: Vector2)
 	if (not Grid.isInside(cell)) then
 		return
 	end
@@ -59,16 +59,16 @@ function Ghost.spawnTile(cell: Vector2)
 
 	-- determine color from latest server update
 	local key = ("%d,%d"):format(cell.X, cell.Y)
-	local occupied = Ghost.ghostColors[key] or false -- <- use Ghost.ghostColors
+	local occupied = BuildingPreview.ghostColors[key] or false -- <- use BuildingPreview.ghostColors
 	local color = occupied and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 255, 0)
 	local opacity = 0.5
 
 	local part = spawnPart(CFrame.new(worldPos), Vector3.new(Grid.tileSize, 0.5, Grid.tileSize), color, opacity)
-	table.insert(Ghost.tiles, part)
+	table.insert(BuildingPreview.tiles, part)
 end
 
 -- spawn grid line (persistent)
-function Ghost.spawnGridLine(cell: Vector2, centerCell: Vector2)
+function BuildingPreview.spawnGridLine(cell: Vector2, centerCell: Vector2)
 	if (not Grid.isInside(cell)) then
 		return
 	end
@@ -103,14 +103,14 @@ function Ghost.spawnGridLine(cell: Vector2, centerCell: Vector2)
 
 	for _, e in ipairs(edges) do
 		local part = spawnPart(e.CFrame, e.Size, Color3.fromRGB(0, 255, 0), transparency)
-		table.insert(Ghost.gridLines, part)
+		table.insert(BuildingPreview.gridLines, part)
 	end
 end
 
 -- spawn ghost model
-function Ghost.spawnGhostModel(key: string, cell: Vector2, occupied: boolean)
-	if (Ghost.ghostModel) then
-		Ghost.ghostModel:Destroy()
+function BuildingPreview.spawnGhostModel(key: string, cell: Vector2, occupied: boolean)
+	if (BuildingPreview.ghostModel) then
+		BuildingPreview.ghostModel:Destroy()
 	end
 
 	local TEMPLATES = ReplicatedStorage:WaitForChild("Cloud"):WaitForChild("BuildingTemplates")
@@ -145,33 +145,33 @@ function Ghost.spawnGhostModel(key: string, cell: Vector2, occupied: boolean)
 	end
 
 	model.Parent = folder
-	Ghost.ghostModel = model
+	BuildingPreview.ghostModel = model
 end
 
 -- clear ghost tiles only (per-frame)
-function Ghost.clearTiles()
-	for _, p in ipairs(Ghost.tiles) do
+function BuildingPreview.clearTiles()
+	for _, p in ipairs(BuildingPreview.tiles) do
 		p.Parent = nil
-		table.insert(Ghost.partPool, p)
+		table.insert(BuildingPreview.partPool, p)
 	end
-	Ghost.tiles = {}
+	BuildingPreview.tiles = {}
 end
 
 -- clear grid lines (when toggling off)
-function Ghost.clearGrid()
-	for _, p in ipairs(Ghost.gridLines) do
+function BuildingPreview.clearGrid()
+	for _, p in ipairs(BuildingPreview.gridLines) do
 		p.Parent = nil
-		table.insert(Ghost.partPool, p)
+		table.insert(BuildingPreview.partPool, p)
 	end
-	Ghost.gridLines = {}
+	BuildingPreview.gridLines = {}
 end
 
 -- clear ghost model
-function Ghost.clearGhostModel()
-	if (Ghost.ghostModel) then
-		Ghost.ghostModel:Destroy()
-		Ghost.ghostModel = nil
+function BuildingPreview.clearGhostModel()
+	if (BuildingPreview.ghostModel) then
+		BuildingPreview.ghostModel:Destroy()
+		BuildingPreview.ghostModel = nil
 	end
 end
 
-return Ghost
+return BuildingPreview
