@@ -54,6 +54,16 @@ end
 
 -- spawn all grid lines once
 local function spawnGrid()
+	if gridClearing then
+		gridClearing = false
+
+		pendingGridCells = {}
+		pendingGridIndex = 1
+
+		BuildingPreview.clearGrid()
+		gridSpawned = false
+	end
+
 	if gridSpawned then
 		return
 	end
