@@ -95,17 +95,12 @@ local function clearGrid()
 	pendingGridIndex = 1
 
 	local playerCell = getPlayerCell()
-	local half = math.floor(Grid.areaSize / 2)
 
-	for dx = -half, half do
-		for dy = -half, half do
-			local cell = Vector2.new(dx, dy)
-
-			table.insert(pendingGridCells, {
-				cell = cell,
-				distance = (cell - playerCell).Magnitude,
-			})
-		end
+	for _, cell in ipairs(BuildingPreview.spawnedGridCells) do
+		table.insert(pendingGridCells, {
+			cell = cell,
+			distance = (cell - playerCell).Magnitude,
+		})
 	end
 
 	table.sort(pendingGridCells, function(a, b)

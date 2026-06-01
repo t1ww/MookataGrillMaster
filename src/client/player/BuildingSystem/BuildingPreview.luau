@@ -8,6 +8,7 @@ local BuildingPreview = {}
 BuildingPreview.tiles = {}
 -- persistent grid lines (guide)
 BuildingPreview.gridLines = {} -- [cellKey] = {parts}
+BuildingPreview.spawnedGridCells = {}
 -- part pool for recycling
 BuildingPreview.partPool = {}
 -- colors for ghost tiles
@@ -112,6 +113,7 @@ function BuildingPreview.spawnGridLine(cell: Vector2, centerCell: Vector2)
 	end
 
 	BuildingPreview.gridLines[key] = {}
+	table.insert(BuildingPreview.spawnedGridCells, cell)
 
 	for _, e in ipairs(edges) do
 		local part = spawnPart(e.CFrame, e.Size, Color3.fromRGB(0, 255, 0), transparency)
@@ -177,6 +179,12 @@ function BuildingPreview.removeGridCell(cell: Vector2)
 	end
 
 	BuildingPreview.gridLines[key] = nil
+	for i, spawnedCell in ipairs(BuildingPreview.spawnedGridCells) do
+		if spawnedCell == cell then
+			table.remove(BuildingPreview.spawnedGridCells, i)
+			break
+		end
+	end
 end
 
 -- clear ghost tiles only (per-frame)
@@ -198,6 +206,7 @@ function BuildingPreview.clearGrid()
 	end
 
 	BuildingPreview.gridLines = {}
+	BuildingPreview.spawnedGridCells = {}
 end
 
 -- clear ghost model
