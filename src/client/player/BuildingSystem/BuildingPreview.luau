@@ -131,6 +131,8 @@ function BuildingPreview.spawnGhostModel(key: string, cell: Vector2, occupied: b
 		if part:IsA("BasePart") then
 			part.Anchored = true
 			part.CanCollide = false
+			part.CanTouch = false
+			part.CanQuery = false
 			part.Transparency = 0.5
 			part.Color = color
 		end
