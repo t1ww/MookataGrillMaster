@@ -37,7 +37,7 @@ local lastPointRequestId = 0
 -- grid spawning queue
 local pendingGridCells = {}
 local pendingGridIndex = 1
-local GRID_CELLS_PER_FRAME = 20
+local GRID_CELLS_PER_FRAME = 60
 
 local gridClearing = false
 
