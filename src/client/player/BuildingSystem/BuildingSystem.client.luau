@@ -34,46 +34,105 @@ local gridSpawned = false
 local lastCell: Vector2? = nil
 local lastPointRequestId = 0
 
+-- grid spawning queue
+local pendingGridCells = {}
+local pendingGridIndex = 1
+local GRID_CELLS_PER_FRAME = 20
+
+local gridClearing = false
+
+local function getPlayerCell(): Vector2
+	local character = localPlayer.Character
+	local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+
+	if rootPart then
+		return Grid.worldToCell(rootPart.Position)
+	end
+
+	return Vector2.zero
+end
+
 -- spawn all grid lines once
 local function spawnGrid()
-	if (gridSpawned) then
+	if gridSpawned then
 		return
 	end
+
 	gridSpawned = true
+	gridClearing = false
+
+	pendingGridCells = {}
+	pendingGridIndex = 1
+
+	local playerCell = getPlayerCell()
 	local half = math.floor(Grid.areaSize / 2)
+
 	for dx = -half, half do
 		for dy = -half, half do
-			BuildingPreview.spawnGridLine(Vector2.new(dx, dy), Vector2.zero)
+			local cell = Vector2.new(dx, dy)
+
+			table.insert(pendingGridCells, {
+				cell = cell,
+				distance = (cell - playerCell).Magnitude,
+			})
 		end
 	end
+
+	table.sort(pendingGridCells, function(a, b)
+		return a.distance < b.distance
+	end)
 end
 
 -- clear all grid lines
 local function clearGrid()
-	if (not gridSpawned) then
+	if not gridSpawned then
 		return
 	end
-	gridSpawned = false
-	BuildingPreview.clearGrid() -- this now clear only grid lines on toggle off
+
+	gridClearing = true
+
+	pendingGridCells = {}
+	pendingGridIndex = 1
+
+	local playerCell = getPlayerCell()
+	local half = math.floor(Grid.areaSize / 2)
+
+	for dx = -half, half do
+		for dy = -half, half do
+			local cell = Vector2.new(dx, dy)
+
+			table.insert(pendingGridCells, {
+				cell = cell,
+				distance = (cell - playerCell).Magnitude,
+			})
+		end
+	end
+
+	table.sort(pendingGridCells, function(a, b)
+		return a.distance > b.distance
+	end)
 end
 
 -- centralized ghost renderer (single source of truth)
 local function renderGhost(cell: Vector2)
-	if (not currentKey) then
+	if not currentKey then
 		return
 	end
 
 	local size = FurnitureData[currentKey].Size
 	local occupied = false
+
 	for dx = 0, size.X - 1 do
 		for dy = 0, size.Y - 1 do
 			local key = ("%d,%d"):format(cell.X + dx, cell.Y + dy)
-			if (BuildingPreview.ghostColors[key]) then
+
+			if BuildingPreview.ghostColors[key] then
 				occupied = true
 				break
 			end
 		end
-		if (occupied) then
+
+		if occupied then
 			break
 		end
 	end
@@ -84,12 +143,14 @@ end
 
 -- toggle key
 UserInputService.InputBegan:Connect(function(input, gpe)
-	if (gpe) then
+	if gpe then
 		return
 	end
-	if (input.KeyCode == Enum.KeyCode.One) then
+
+	if input.KeyCode == Enum.KeyCode.One then
 		buildModeEnabled = not buildModeEnabled
-		if (buildModeEnabled) then
+
+		if buildModeEnabled then
 			spawnGrid()
 		else
 			lastCell = nil
@@ -100,8 +161,38 @@ UserInputService.InputBegan:Connect(function(input, gpe)
 end)
 
 RunService.RenderStepped:Connect(function()
+	-- gradually spawn grid lines from player outward
+	if buildModeEnabled and gridSpawned and not gridClearing then
+		for _ = 1, GRID_CELLS_PER_FRAME do
+			local data = pendingGridCells[pendingGridIndex]
+
+			if not data then
+				break
+			end
+
+			BuildingPreview.spawnGridLine(data.cell, getPlayerCell())
+
+			pendingGridIndex += 1
+		end
+	end
+
+	-- gradually remove grid lines from furthest inward
+	if gridClearing then
+		for _ = 1, GRID_CELLS_PER_FRAME do
+			local data = pendingGridCells[pendingGridIndex]
+
+			if not data then
+				gridClearing = false
+				gridSpawned = false
+				break
+			end
+			BuildingPreview.removeGridCell(data.cell)
+			pendingGridIndex += 1
+		end
+	end
+
 	-- only clear ghost tiles, grid lines remain
-	if ((not buildModeEnabled) or (not currentKey) or (not mouse.Hit)) then
+	if (not buildModeEnabled) or not currentKey or not mouse.Hit then
 		lastCell = nil
 		BuildingPreview.clearGhostModel()
 		return
@@ -111,12 +202,13 @@ RunService.RenderStepped:Connect(function()
 	local cell = Grid.getPointingCell(mouse.Hit.Position, size)
 
 	-- only update if cell changed
-	if (lastCell and lastCell == cell) then
+	if lastCell and lastCell == cell then
 		return
 	end
 
 	lastCell = cell
 	lastPointRequestId += 1
+
 	pointEv:FireServer(cell, size, lastPointRequestId) -- only here
 
 	renderGhost(cell)
@@ -124,14 +216,17 @@ end)
 
 -- placement
 UserInputService.InputBegan:Connect(function(input, gpe)
-	if (gpe) then
+	if gpe then
 		return
 	end
-	if (not buildModeEnabled) then
+
+	if not buildModeEnabled then
 		return
 	end
-	if (input.UserInputType == Enum.UserInputType.MouseButton1 and currentKey) then
+
+	if input.UserInputType == Enum.UserInputType.MouseButton1 and currentKey then
 		placeEv:FireServer(currentKey, lastCell)
+
 		-- force next RenderStepped to recompute
 		lastCell = nil
 	end
@@ -139,14 +234,14 @@ end)
 
 -- listen for server updates
 ghostEv.OnClientEvent:Connect(function(cell: Vector2, occupied: boolean, requestId: number?)
-	if (not requestId or requestId ~= lastPointRequestId) then
+	if not requestId or requestId ~= lastPointRequestId then
 		return
 	end
 
 	local key = ("%d,%d"):format(cell.X, cell.Y)
 	BuildingPreview.ghostColors[key] = occupied
 
-	if (lastCell and lastCell == cell) then
+	if lastCell and lastCell == cell then
 		renderGhost(cell)
 	end
 end)

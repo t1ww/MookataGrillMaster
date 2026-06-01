@@ -7,7 +7,7 @@ local BuildingPreview = {}
 -- active ghost tiles (per-frame)
 BuildingPreview.tiles = {}
 -- persistent grid lines (guide)
-BuildingPreview.gridLines = {}
+BuildingPreview.gridLines = {} -- [cellKey] = {parts}
 -- part pool for recycling
 BuildingPreview.partPool = {}
 -- colors for ghost tiles
@@ -105,9 +105,17 @@ function BuildingPreview.spawnGridLine(cell: Vector2, centerCell: Vector2)
 		},
 	}
 
+	local key = ("%d,%d"):format(cell.X, cell.Y)
+
+	if BuildingPreview.gridLines[key] then
+		return
+	end
+
+	BuildingPreview.gridLines[key] = {}
+
 	for _, e in ipairs(edges) do
 		local part = spawnPart(e.CFrame, e.Size, Color3.fromRGB(0, 255, 0), transparency)
-		table.insert(BuildingPreview.gridLines, part)
+		table.insert(BuildingPreview.gridLines[key], part)
 	end
 end
 
@@ -154,6 +162,23 @@ function BuildingPreview.spawnGhostModel(key: string, cell: Vector2, occupied: b
 	BuildingPreview.ghostModel = model
 end
 
+-- Despawn ghost tiles one by one (when toggling off)
+function BuildingPreview.removeGridCell(cell: Vector2)
+	local key = ("%d,%d"):format(cell.X, cell.Y)
+
+	local parts = BuildingPreview.gridLines[key]
+	if not parts then
+		return
+	end
+
+	for _, p in ipairs(parts) do
+		p.Parent = nil
+		table.insert(BuildingPreview.partPool, p)
+	end
+
+	BuildingPreview.gridLines[key] = nil
+end
+
 -- clear ghost tiles only (per-frame)
 function BuildingPreview.clearTiles()
 	for _, p in ipairs(BuildingPreview.tiles) do
@@ -165,10 +190,13 @@ end
 
 -- clear grid lines (when toggling off)
 function BuildingPreview.clearGrid()
-	for _, p in ipairs(BuildingPreview.gridLines) do
-		p.Parent = nil
-		table.insert(BuildingPreview.partPool, p)
+	for _, parts in pairs(BuildingPreview.gridLines) do
+		for _, p in ipairs(parts) do
+			p.Parent = nil
+			table.insert(BuildingPreview.partPool, p)
+		end
 	end
+
 	BuildingPreview.gridLines = {}
 end
 
