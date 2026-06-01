@@ -19,7 +19,7 @@ local LINE_THICKNESS = 0.15
 
 -- folder to keep ghost parts organized
 local folder = workspace:FindFirstChild("BuildingGhosts")
-if (not folder) then
+if not folder then
 	folder = Instance.new("Folder")
 	folder.Name = "BuildingGhosts"
 	folder.Parent = workspace
@@ -28,15 +28,19 @@ end
 -- get a part from pool or create new
 local function getPart(): Part
 	local p = table.remove(BuildingPreview.partPool)
-	if (p) then
+	if p then
 		p.Parent = folder
 		return p
 	end
+	-- Create new part
 	local newPart = Instance.new("Part")
 	newPart.Anchored = true
 	newPart.CanCollide = false
+	newPart.CanTouch = false
+	newPart.CanQuery = false
 	newPart.Material = Enum.Material.Neon
 	newPart.Parent = folder
+
 	return newPart
 end
 
@@ -52,7 +56,7 @@ end
 
 -- spawn a ghost tile (highlight)
 function BuildingPreview.spawnTile(cell: Vector2)
-	if (not Grid.isInside(cell)) then
+	if not Grid.isInside(cell) then
 		return
 	end
 	local worldPos = Grid.cellToWorld(cell)
@@ -69,7 +73,7 @@ end
 
 -- spawn grid line (persistent)
 function BuildingPreview.spawnGridLine(cell: Vector2, centerCell: Vector2)
-	if (not Grid.isInside(cell)) then
+	if not Grid.isInside(cell) then
 		return
 	end
 	local worldPos = Grid.cellToWorld(cell)
@@ -109,13 +113,13 @@ end
 
 -- spawn ghost model
 function BuildingPreview.spawnGhostModel(key: string, cell: Vector2, occupied: boolean)
-	if (BuildingPreview.ghostModel) then
+	if BuildingPreview.ghostModel then
 		BuildingPreview.ghostModel:Destroy()
 	end
 
 	local TEMPLATES = ReplicatedStorage:WaitForChild("Cloud"):WaitForChild("BuildingTemplates")
 	local template = TEMPLATES:FindFirstChild(key)
-	if (not template) then
+	if not template then
 		return
 	end
 	local model = template:Clone()
@@ -124,7 +128,7 @@ function BuildingPreview.spawnGhostModel(key: string, cell: Vector2, occupied: b
 
 	-- make it ghost
 	for _, part in ipairs(model:GetDescendants()) do
-		if (part:IsA("BasePart")) then
+		if part:IsA("BasePart") then
 			part.Anchored = true
 			part.CanCollide = false
 			part.Transparency = 0.5
@@ -138,7 +142,7 @@ function BuildingPreview.spawnGhostModel(key: string, cell: Vector2, occupied: b
 	local centerCell = cell + Vector2.new((size.X - 1) / 2, (size.Y - 1) / 2)
 	local pos = Grid.cellToWorld(centerCell)
 
-	if (model.PrimaryPart) then
+	if model.PrimaryPart then
 		model:SetPrimaryPartCFrame(CFrame.new(pos + Vector3.new(0, model.PrimaryPart.Size.Y / 2, 0)))
 	else
 		model:PivotTo(CFrame.new(pos))
@@ -168,7 +172,7 @@ end
 
 -- clear ghost model
 function BuildingPreview.clearGhostModel()
-	if (BuildingPreview.ghostModel) then
+	if BuildingPreview.ghostModel then
 		BuildingPreview.ghostModel:Destroy()
 		BuildingPreview.ghostModel = nil
 	end
