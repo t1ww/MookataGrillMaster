@@ -1,12 +1,21 @@
 -- src\store\Shared\Game\BuildingSystem\BuildingGrid.luau
 --!strict
 local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local createEnum = require(ReplicatedStorage.FromRojo.Shared.utility.EnumFactory)
 
 local Grid = {}
 
 Grid.tileSize = 4
 Grid.areaSize = 50
 Grid.plotOrigin = Vector3.new(0, 0, 0)
+
+Grid.Rotation = createEnum({
+	"North",
+	"East",
+	"South",
+	"West",
+})
 
 -- Bounds helpers
 local function getHalfSize(): number
@@ -90,6 +99,27 @@ end
 
 function Grid.setPlotOrigin(origin: Vector3)
 	Grid.plotOrigin = origin
+end
+
+-- Rotations
+function Grid.rotateClockwise(rotation: number): number
+	return (rotation % 4) + 1
+end
+
+function Grid.rotateCounterClockwise(rotation: number): number
+	return ((rotation + 2) % 4) + 1
+end
+
+function Grid.rotationToAngle(rotation: number): number
+	return math.rad((rotation - 1) * 90)
+end
+
+function Grid.getRotatedSize(size: Vector2, rotation: number): Vector2
+	if rotation == Grid.Rotation.Enum.North or rotation == Grid.Rotation.Enum.South then
+		return size
+	end
+
+	return Vector2.new(size.Y, size.X)
 end
 
 return Grid
